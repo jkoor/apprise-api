@@ -718,25 +718,32 @@ class NotifyView(View):
                     status=status,
                 )
         #
-        # Allow 'format' value to be specified as part of the URL
+        # Allow 'format' key to be specified as part of the URL
         # parameters if not found otherwise defined.
         #
         if not content.get('format') and 'format' in request.GET:
-            content['format'] = request.GET['format']
+            content['format'] = request.POST[request.GET['format']]
 
         #
-        # Allow 'type' value to be specified as part of the URL parameters
+        # Allow 'type' key to be specified as part of the URL parameters
         # if not found otherwise defined.
         #
         if not content.get('type') and 'type' in request.GET:
-            content['type'] = request.GET['type']
+            content['type'] = request.POST[request.GET['type']]
 
         #
-        # Allow 'title' value to be specified as part of the URL parameters
+        # Allow 'title' key to be specified as part of the URL parameters
         # if not found otherwise defined.
         #
         if not content.get('title') and 'title' in request.GET:
-            content['title'] = request.GET['title']
+            content['title'] = request.POST[request.GET['title']]
+
+        #
+        # Allow 'body' key to be specified as part of the URL parameters
+        # if not found otherwise defined.
+        #
+        if not content.get('body') and 'body' in request.GET:
+            content['body'] = request.POST[request.GET['body']]
 
         # Some basic error checking
         if not content.get('body') and not attach or \
