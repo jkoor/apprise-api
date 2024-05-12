@@ -33,7 +33,7 @@ import json
 import apprise
 
 # Grant access to our Notification Manager Singleton
-N_MGR = apprise.NotificationManager.NotificationManager()
+N_MGR = apprise.manager_plugins.NotificationManager()
 
 
 class StatelessNotifyTests(SimpleTestCase):
@@ -118,6 +118,39 @@ class StatelessNotifyTests(SimpleTestCase):
             assert mock_notify.call_count == 1
 
             # Reset our mock object
+            mock_notify.reset_mock()
+
+            form_data = {
+                'payload': '## test notification',
+                'fmt': apprise.NotifyFormat.MARKDOWN,
+                'extra': 'mailto://user:pass@hotmail.com',
+            }
+
+            # We sent the notification successfully (use our rule mapping)
+            # FORM
+            response = self.client.post(
+                '/notify/?:payload=body&:fmt=format&:extra=urls',
+                form_data)
+            assert response.status_code == 200
+            assert mock_notify.call_count == 1
+
+            mock_notify.reset_mock()
+
+            form_data = {
+                'payload': '## test notification',
+                'fmt': apprise.NotifyFormat.MARKDOWN,
+                'extra': 'mailto://user:pass@hotmail.com',
+            }
+
+            # We sent the notification successfully (use our rule mapping)
+            # JSON
+            response = self.client.post(
+                '/notify/?:payload=body&:fmt=format&:extra=urls',
+                json.dumps(form_data),
+                content_type="application/json")
+            assert response.status_code == 200
+            assert mock_notify.call_count == 1
+
             mock_notify.reset_mock()
 
         # Long Filename
@@ -317,7 +350,7 @@ class StatelessNotifyTests(SimpleTestCase):
         }
 
         # Monkey Patch
-        apprise.plugins.NotifyEmail.NotifyEmail.enabled = True
+        apprise.plugins.email.NotifyEmail.enabled = True
 
         # At a minimum 'body' is requred
         form = NotifyByUrlForm(data=form_data)
@@ -573,7 +606,7 @@ class StatelessNotifyTests(SimpleTestCase):
         assert response.status_code == 400
         assert mock_notify.call_count == 0
 
-    @mock.patch('apprise.plugins.NotifyJSON.NotifyJSON.send')
+    @mock.patch('apprise.plugins.custom_json.NotifyJSON.send')
     def test_notify_with_filters(self, mock_send):
         """
         Test workings of APPRISE_DENY_SERVICES and APPRISE_ALLOW_SERVICES
